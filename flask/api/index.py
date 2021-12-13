@@ -1,6 +1,6 @@
 from os import environ
 from datetime import datetime
-from flask import Flask, jsonify, abort, request
+from flask import Flask, jsonify, request
 
 from api.models import UserModel, UserSchema, WorkedHourModel, WorkedHourSchema
 
@@ -19,8 +19,8 @@ worked_hours_schema = WorkedHourSchema(many=True)
 # A route to list all the users in the system.
 @app.route('/v1/users')
 def user_list():
-    # Let's get all the users here.
-    all_users = UserModel.query.all()
+    # Let's get all the users here. Ordered by id.
+    all_users = UserModel.query.order_by(UserModel.id).all()
 
     # Let's return the user list as JSON.
     return jsonify(users_schema.dump(all_users))
@@ -34,9 +34,10 @@ def worked_hours_list(user_id):
 
     if user is None:
         # The user does not exist. Let's throw 404.
-        abort(404)
+        return jsonify({"error": "The user does not exist"}), 404
 
-    user_worked_hours = WorkedHourModel.query.filter_by(user_id = user_id).all()
+    # Let's get the worked hours ordered by date.
+    user_worked_hours = WorkedHourModel.query.filter_by(user_id = user_id).order_by(WorkedHourModel.date).all()
     return jsonify(worked_hours_schema.dump(user_worked_hours))
 
 
@@ -48,7 +49,7 @@ def create_worked_hour(user_id):
 
     if user is None:
         # User does not exist. Throw 404.
-        abort(404)
+        return jsonify({"error": "The user does not exist"}), 404
 
     # Let's get the body params (date and hours)
     worked_date_request = request.json.get('date', None)
