@@ -4,14 +4,15 @@ FROM python:3.9-alpine
 # Installing packages
 RUN apk update
 RUN apk add postgresql-dev gcc python3-dev musl-dev g++
-RUN pip install --no-cache-dir pipenv
-RUN pip install flask
+
+# Copy the requirements.txt file
+COPY ./requirements.txt /usr/src/app/requirements.txt
+
+# Install the pip requirements
+RUN pip install -r /usr/src/app/requirements.txt
 
 # Defining working directory and adding source code
 WORKDIR /usr/src/app
-
-# Install API dependencies
-RUN pipenv install
 
 # Start app
 EXPOSE 8000
