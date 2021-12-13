@@ -1,6 +1,7 @@
 from os import environ
 from datetime import datetime
 from flask import Flask, jsonify, request
+from marshmallow.fields import Integer
 
 from api.models import UserModel, UserSchema, WorkedHourModel, WorkedHourSchema
 
@@ -16,11 +17,32 @@ users_schema = UserSchema(many=True)
 worked_hour_schema = WorkedHourSchema()
 worked_hours_schema = WorkedHourSchema(many=True)
 
-# A route to list all the users in the system.
+# A route to list paginated list of users in the system.
 @app.route('/v1/users')
 def user_list():
+    # Let's get the page and limit if specified.
+    page_request = request.args.get('page', 1)
+    limit_request = request.args.get('limit', 10)
+
+    try:
+        # Convert page param to integer
+        page = int(page_request)
+    except:
+        # We were not able to convert. Let's set it to 1.
+        page = 1
+
+    try:
+        # Convert limit param to integer
+        limit = int(limit_request)
+    except:
+        # We were not able to convert. Let's set it to 10.
+        limit = 10
+
+    # Let's calculate the offset here.
+    offset = (page - 1) * limit
+
     # Let's get all the users here. Ordered by id.
-    all_users = UserModel.query.order_by(UserModel.id).all()
+    all_users = UserModel.query.order_by(UserModel.id).offset(offset).limit(limit).all()
 
     # Let's return the user list as JSON.
     return jsonify(users_schema.dump(all_users))
