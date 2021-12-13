@@ -12,3 +12,16 @@ services:
       - ./sql/data.sql:/docker-entrypoint-initdb.d/2-data.sql
     env_file:
       - .env.dev
+
+  api:
+    build: ./flask
+    container_name: userhours-api
+    depends_on:
+      - db
+    env_file:
+      - .env.dev
+    ports:
+      - 8000:8000
+    restart: always
+    volumes:
+      - ./flask:/usr/src/app
