@@ -1,6 +1,7 @@
 from api.database import db, ma
 
 class UserModel(db.Model):
+    # The table name as present in the provided schema.
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -13,5 +14,6 @@ class UserModel(db.Model):
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        # We only want to expose certain fields in the API.
         fields = ("id", "first_name", "last_name", "email")
         model = UserModel
